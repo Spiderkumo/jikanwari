@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>時間割生成ツール v2.3</title>
+<style>
+:root{--bg:#f6f8fc;--card:#fff;--main:#2563eb;--main2:#1d4ed8;--dark:#0f172a;--line:#d7deea;--sub:#eaf1ff;--text:#111827;--muted:#64748b;--ok:#15803d;--warn:#b45309;--ng:#dc2626;--soft:#f8fafc}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Yu Gothic",Meiryo,sans-serif}header{background:var(--dark);color:#fff;padding:16px 22px;position:sticky;top:0;z-index:20}header h1{font-size:20px;margin:0}header p{margin:5px 0 0;color:#cbd5e1;font-size:12px}main{max-width:1400px;margin:0 auto;padding:18px}.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px;box-shadow:0 1px 3px rgba(15,23,42,.06)}h2{font-size:18px;margin:0 0 12px;border-left:5px solid var(--main);padding-left:10px}h3{font-size:15px;margin:18px 0 8px}.note{font-size:13px;color:var(--muted);line-height:1.65}.important{background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:10px;font-size:13px;line-height:1.65}.guide{background:#eef6ff;border:1px solid #bfdbfe;border-radius:12px;padding:12px;margin-bottom:12px;font-size:13px;line-height:1.7}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.tab{border:1px solid var(--line);background:#fff;color:#111827;border-radius:999px;padding:9px 13px;font-weight:700;cursor:pointer}.tab.active{background:var(--main);color:#fff;border-color:var(--main)}.section{display:none}.section.active{display:block}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}label{display:block;color:#111827;font-size:13px;font-weight:700;margin-bottom:5px}input,select,textarea{width:100%;border:1px solid var(--line);border-radius:8px;background:#fff;color:#111827;padding:8px;font-size:14px}input[type=checkbox]{width:auto}button{border:0;background:var(--main);color:white;border-radius:9px;padding:8px 12px;font-weight:700;cursor:pointer}button:hover{filter:brightness(.96)}button.secondary{background:#475569}button.light{background:#e2e8f0;color:#111827}button.danger{background:#dc2626}.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}table{width:100%;border-collapse:collapse;background:#fff;font-size:13px}th,td{border:1px solid var(--line);padding:7px;vertical-align:middle}th{background:var(--sub);text-align:center;white-space:nowrap}.table-wrap{overflow:auto}.center{text-align:center}.mini{font-size:12px;color:var(--muted)}.pill{display:inline-block;border-radius:999px;padding:2px 8px;font-weight:700;font-size:12px;background:#e2e8f0}.pill.ok{background:#dcfce7;color:var(--ok)}.pill.warn{background:#fef3c7;color:var(--warn)}.pill.ng{background:#fee2e2;color:var(--ng)}.check-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(78px,1fr));gap:6px}.check-grid label{display:flex;align-items:center;gap:5px;font-weight:500;margin:0}.call-cell{min-width:230px}.call-cell label{font-weight:500}.candidate-nav{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}.candidate-nav button{background:#e2e8f0;color:#111827}.candidate-nav button.active{background:#16a34a;color:white}.editable{background:#fffef0}.fixed-box{background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:10px}.summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}.summary div{background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:10px}.summary strong{font-size:20px;display:block}.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}.step{background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:10px}.step b{display:block;margin-bottom:4px}.nowrap{white-space:nowrap}.print-area{display:none}.small-input{min-width:72px}.hidden{display:none!important}@media print{header,.tabs,.no-print,.section:not(.print-section){display:none!important}body{background:#fff}main{max-width:none;padding:0}.card{border:0;box-shadow:none}.print-area{display:block!important}table{font-size:11px}tr{page-break-inside:avoid}}
+</style>
+</head>
+<body>
+<header><h1>時間割生成ツール v2.3</h1><p>講座名・クラス名・基本コマを自由に追加編集できる版／裏被り・校舎間移動60分判定対応</p></header>
+<main>
+  <div class="card no-print">
+    <h2>基本設定</h2>
+    <div class="guide">
+      <div class="steps">
+        <div class="step"><b>1. 校舎・曜日</b>校舎が開いている曜日を設定</div>
+        <div class="step"><b>2. クラス・講座</b>1A、2A、ジュニア等を追加・編集</div>
+        <div class="step"><b>3. 基本コマ</b>17:00〜17:40など時間帯を自由設定</div>
+        <div class="step"><b>4. 曜日別呼び出し</b>水曜は1A・3Aなどを指定</div>
+        <div class="step"><b>5. 生成</b>科目と講師を自動配置</div>
+      </div>
+    </div>
+    <div class="grid">
+      <div><label>作成年</label><input id="year" type="number"></div>
+      <div><label>作成月</label><input id="month" type="number" min="1" max="12"></div>
+      <div><label>月間換算週数</label><input id="weeks" type="number" min="1" value="4"></div>
+      <div><label>生成候補数</label><input id="candidateCount" type="number" min="1" max="20" value="5"></div>
+      <div><label>校舎間移動に必要な時間（分）</label><input id="moveMinutes" type="number" min="0" value="60"><div class="mini">例：17:40終了→18:40開始なら移動可</div></div>
+    </div>
+    <div class="btn-row">
+      <button onclick="generateCandidates()">時間割候補を作成</button>
+      <button class="secondary" onclick="showAllCandidates()">候補を全て表示</button>
+      <button class="light" onclick="saveBrowser()">ブラウザ保存</button>
+      <button class="light" onclick="loadBrowser()">ブラウザ読込</button>
+      <button class="light" onclick="downloadJson()">JSON保存</button>
+      <label class="light" style="display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:9px;cursor:pointer;background:#e2e8f0;font-weight:700;">JSON読込<input type="file" accept=".json" onchange="loadJsonFile(event)" style="display:none"></label>
+    </div>
+  </div>
+
+  <div class="tabs no-print">
+    <button class="tab active" onclick="openTab('schoolSec',this)">校舎・開校曜日</button>
+    <button class="tab" onclick="openTab('courseSec',this)">クラス・講座</button>
+    <button class="tab" onclick="openTab('periodSec',this)">一日の基本コマ</button>
+    <button class="tab" onclick="openTab('callSec',this)">曜日別呼び出し</button>
+    <button class="tab" onclick="openTab('teacherSec',this)">講師登録</button>
+    <button class="tab" onclick="openTab('requiredSec',this)">必要コマ数</button>
+    <button class="tab" onclick="openTab('resultSec',this)">生成結果</button>
+    <button class="tab" onclick="openTab('studentSec',this)">生徒配布用</button>
+    <button class="tab" onclick="openTab('teacherOutSec',this)">講師別</button>
+  </div>
+
+  <section id="schoolSec" class="section active"><div class="card"><h2>校舎・開校曜日設定</h2><p class="note">校舎ごとに開いている曜日を設定します。開いていない曜日には自動配置しません。</p><div class="btn-row"><button onclick="addSchool()">校舎を追加</button></div><div id="schoolOpenTable" class="table-wrap"></div></div></section>
+
+  <section id="courseSec" class="section"><div class="card"><h2>クラス・講座マスタ</h2><p class="note">1A・2Aなどの中学生クラスも、ジュニア・英検の力などの小学生講座も、ここで追加・名称変更できます。<br>「中学生5科目」にすると必要コマ数は国数英理社で管理します。「講座扱い」にすると、その講座名自体を必要コマ数として管理します。</p><div class="btn-row"><button onclick="addCourse()">クラス・講座を追加</button></div><div id="courseMasterTable" class="table-wrap"></div><h3>校舎別 使用設定</h3><p class="note">校舎に存在するクラス・講座だけONにしてください。</p><div id="courseUseTable" class="table-wrap"></div></div></section>
+
+  <section id="periodSec" class="section"><div class="card"><h2>一日の基本コマ設定</h2><p class="note">コマ名、開始時刻、授業時間、休憩時間を自由に設定できます。適用先を選ぶと、そのクラス・講座が曜日別呼び出しされた日に自動で枠が作られます。<br>例：ジュニア1＝17:00から40分、ジュニア2＝17:45から40分。中学生1＝19:20から60分。</p><div class="btn-row"><button onclick="addPeriod()">基本コマを追加</button></div><div id="periodTable" class="table-wrap"></div><div class="important">裏被りは可能です。同じ校舎・同じ時間に1Aと2A、ジュニアと英検の力などがあっても、講師が別なら配置できます。</div></div></section>
+
+  <section id="callSec" class="section"><div class="card"><h2>曜日別呼び出し設定</h2><p class="note">ここで「その曜日に呼ぶクラス・講座」を決めます。例：水曜に1A・3AだけをONにした場合、水曜に2Aは勝手に入りません。</p><div id="callTable" class="table-wrap"></div></div></section>
+
+  <section id="teacherSec" class="section"><div class="card"><h2>講師登録</h2><p class="note">校舎固定ONの講師は、その校舎以外には配置しません。ジュニアのような講座も、対応講座にチェックされた講師だけを候補にできます。ジュニアを全員可にしたい場合は、全講師にチェックしてください。</p><div class="btn-row"><button onclick="addTeacherRow()">講師を追加</button></div><div id="teacherTable" class="table-wrap"></div></div></section>
+
+  <section id="requiredSec" class="section"><div class="card"><h2>必要コマ数設定</h2><p class="note">中学生5科目は国数英理社、講座扱いは週コマ数で設定します。</p><h3>中学生5科目</h3><div id="requiredMiddle" class="table-wrap"></div><h3>講座扱い</h3><div id="requiredSpecial" class="table-wrap"></div></div></section>
+
+  <section id="resultSec" class="section"><div class="card"><h2>生成結果</h2><div class="summary" id="resultSummary"></div><div class="candidate-nav" id="candidateNav"></div><div class="btn-row"><button onclick="checkCurrent()">編集後チェック</button><button class="light" onclick="downloadCsv()">CSV出力</button><button class="light" onclick="downloadExcelLike()">Excelで開ける形式</button><button class="secondary" onclick="window.print()">印刷 / PDF保存</button></div><div id="checkBox"></div><div id="resultTable" class="table-wrap"></div></div></section>
+
+  <section id="studentSec" class="section"><div class="card"><h2>生徒配布用</h2><div class="btn-row"><button onclick="renderStudentOutput()">生徒配布用を更新</button></div><div id="studentOutput"></div></div></section>
+  <section id="teacherOutSec" class="section"><div class="card"><h2>講師別時間割</h2><div class="btn-row"><button onclick="renderTeacherOutput()">講師別を更新</button></div><div id="teacherOutput"></div></div></section>
+  <div id="printArea" class="print-area"></div>
+</main>
+<script>
+const days=['月','火','水','木','金','土','日'];
+const baseSubjects=['国','数','英','理','社'];
+let candidates=[]; let currentCandidateIndex=0;
+let state={schools:[], courses:[], open:{}, courseUse:{}, calls:{}, periods:[], required:{}, teachers:[]};
+function uid(prefix){return prefix+'_'+Math.random().toString(36).slice(2,9)}
+function init(){
+  const now=new Date(); year.value=now.getFullYear(); month.value=now.getMonth()+1;
+  state.schools=['大村校','大村竹松校','諫早校'];
+  state.courses=[
+    {id:uid('c'),name:'1A',kind:'middle'}, {id:uid('c'),name:'1B',kind:'middle'}, {id:uid('c'),name:'2A',kind:'middle'}, {id:uid('c'),name:'2B',kind:'middle'}, {id:uid('c'),name:'3A',kind:'middle'}, {id:uid('c'),name:'3B',kind:'middle'},
+    {id:uid('c'),name:'ジュニア',kind:'special'}, {id:uid('c'),name:'中高一貫',kind:'special'}, {id:uid('c'),name:'英検の力',kind:'special'}, {id:uid('c'),name:'パズル',kind:'special'}
+  ];
+  setupDefaultMatrices();
+  const idByName=name=>state.courses.find(c=>c.name===name)?.id;
+  state.periods=[
+    {id:uid('p'),name:'ジュニア1',start:'17:00',duration:40,breakAfter:5,courseIds:[idByName('ジュニア')]},
+    {id:uid('p'),name:'ジュニア2',start:'17:45',duration:40,breakAfter:0,courseIds:[idByName('ジュニア')]},
+    {id:uid('p'),name:'小学生講座',start:'17:00',duration:40,breakAfter:0,courseIds:[idByName('中高一貫'),idByName('英検の力'),idByName('パズル')].filter(Boolean)},
+    {id:uid('p'),name:'中学生1コマ目',start:'19:20',duration:60,breakAfter:10,courseIds:state.courses.filter(c=>c.kind==='middle').map(c=>c.id)},
+    {id:uid('p'),name:'中学生2コマ目',start:'20:30',duration:60,breakAfter:0,courseIds:state.courses.filter(c=>c.kind==='middle').map(c=>c.id)}
+  ];
+  state.teachers=[
+    {name:'講師A',subjects:['英','国'],fixed:true,school:'大村校',specialIds:[idByName('ジュニア'),idByName('英検の力')].filter(Boolean)},
+    {name:'講師B',subjects:['数','理','社'],fixed:false,school:'',specialIds:[idByName('ジュニア'),idByName('パズル')].filter(Boolean)},
+    {name:'講師C',subjects:['英','国','社'],fixed:true,school:'諫早校',specialIds:[idByName('ジュニア'),idByName('中高一貫'),idByName('英検の力')].filter(Boolean)},
+    {name:'講師D',subjects:['数','理'],fixed:false,school:'',specialIds:[idByName('ジュニア')].filter(Boolean)}
+  ];
+  setDefaultUsesAndCalls(); buildRequiredFromCourses(); renderAll();
+}
+function setupDefaultMatrices(){
+  state.schools.forEach(s=>{ if(!state.open[s])state.open[s]={}; days.forEach(d=>state.open[s][d]=['月','火','水','木','金'].includes(d)); if(!state.courseUse[s])state.courseUse[s]={}; if(!state.calls[s])state.calls[s]={}; days.forEach(d=>state.calls[s][d]=[]); });
+}
+function setDefaultUsesAndCalls(){
+  const nameToId=name=>state.courses.find(c=>c.name===name)?.id;
+  state.schools.forEach(s=>state.courses.forEach(c=>state.courseUse[s][c.id]=true));
+  const off=(s,n)=>{const id=nameToId(n); if(id)state.courseUse[s][id]=false};
+  off('大村校','1B');off('大村校','2B');off('大村校','中高一貫');
+  off('大村竹松校','1B');off('大村竹松校','2B');off('大村竹松校','3B');off('大村竹松校','中高一貫');off('大村竹松校','パズル');
+  off('諫早校','1B');off('諫早校','2B');
+  state.schools.forEach(s=>{days.forEach(d=>state.calls[s][d]=[]); const add=(d,n)=>{let id=nameToId(n); if(id && state.courseUse[s][id])state.calls[s][d].push(id)}; add('水','1A');add('水','3A');add('木','2A');add('金','ジュニア');add('金','英検の力');});
+}
+function renderAll(){renderSchoolOpen();renderCourseMaster();renderCourseUse();renderPeriods();renderCalls();renderTeachers();renderRequired();}
+function openTab(id,btn){document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
+function renderSchoolOpen(){let html='<table><thead><tr><th>校舎名</th>'+days.map(d=>`<th>${d}</th>`).join('')+'<th></th></tr></thead><tbody>';state.schools.forEach((s,i)=>{html+=`<tr><td><input value="${esc(s)}" onchange="renameSchool(${i},this.value)"></td>`+days.map(d=>`<td class="center"><input type="checkbox" ${state.open[s]?.[d]?'checked':''} onchange="state.open['${escJS(s)}']['${d}']=this.checked"></td>`).join('')+`<td><button class="danger" onclick="deleteSchool(${i})">削除</button></td></tr>`});html+='</tbody></table>';schoolOpenTable.innerHTML=html;}
+function addSchool(){const name=prompt('追加する校舎名を入力してください。','新校舎'); if(!name)return; state.schools.push(name); state.open[name]={};days.forEach(d=>state.open[name][d]=true); state.courseUse[name]={}; state.courses.forEach(c=>state.courseUse[name][c.id]=false); state.calls[name]={};days.forEach(d=>state.calls[name][d]=[]); renderAll();}
+function renameSchool(i,newName){const old=state.schools[i]; newName=(newName||'').trim(); if(!newName)return renderSchoolOpen(); state.schools[i]=newName; state.open[newName]=state.open[old]||{}; state.courseUse[newName]=state.courseUse[old]||{}; state.calls[newName]=state.calls[old]||{}; state.teachers.forEach(t=>{if(t.school===old)t.school=newName}); if(newName!==old){delete state.open[old];delete state.courseUse[old];delete state.calls[old];} renderAll();}
+function deleteSchool(i){if(!confirm('この校舎を削除しますか？'))return; const s=state.schools[i]; state.schools.splice(i,1); delete state.open[s];delete state.courseUse[s];delete state.calls[s]; renderAll();}
+function renderCourseMaster(){let html='<table><thead><tr><th>名前</th><th>区分</th><th>扱い</th><th>説明</th><th></th></tr></thead><tbody>';state.courses.forEach((c,i)=>{html+=`<tr><td><input value="${esc(c.name)}" onchange="state.courses[${i}].name=this.value;renderAll()"></td><td><select onchange="state.courses[${i}].kind=this.value;buildRequiredFromCourses();renderAll()"><option value="middle" ${c.kind==='middle'?'selected':''}>中学生クラス</option><option value="special" ${c.kind==='special'?'selected':''}>講座扱い</option></select></td><td>${c.kind==='middle'?'国数英理社を配置':'講座名を配置'}</td><td class="mini">${c.kind==='middle'?'例：1A、2A、3B。曜日別呼び出しで裏被り可。':'例：ジュニア、英検の力、パズル。講師登録の対応講座で判定。'}</td><td><button class="danger" onclick="deleteCourse(${i})">削除</button></td></tr>`});html+='</tbody></table>';courseMasterTable.innerHTML=html;}
+function addCourse(){state.courses.push({id:uid('c'),name:'新規講座',kind:'special'});state.schools.forEach(s=>{state.courseUse[s][state.courses.at(-1).id]=false}); buildRequiredFromCourses(); renderAll();}
+function deleteCourse(i){if(!confirm('このクラス・講座を削除しますか？関連設定も削除されます。'))return; const id=state.courses[i].id; state.courses.splice(i,1); state.schools.forEach(s=>{delete state.courseUse[s][id];days.forEach(d=>state.calls[s][d]=state.calls[s][d].filter(x=>x!==id));}); state.periods.forEach(p=>p.courseIds=p.courseIds.filter(x=>x!==id)); state.teachers.forEach(t=>t.specialIds=t.specialIds.filter(x=>x!==id)); Object.keys(state.required).forEach(k=>{if(k.endsWith('|'+id))delete state.required[k]}); renderAll();}
+function renderCourseUse(){let html='<table><thead><tr><th>校舎</th><th>中学生クラス</th><th>講座扱い</th></tr></thead><tbody>';state.schools.forEach(s=>{html+=`<tr><th>${esc(s)}</th><td><div class="check-grid">`+state.courses.filter(c=>c.kind==='middle').map(c=>`<label><input type="checkbox" ${state.courseUse[s]?.[c.id]?'checked':''} onchange="setCourseUse('${escJS(s)}','${c.id}',this.checked)">${esc(c.name)}</label>`).join('')+`</div></td><td><div class="check-grid">`+state.courses.filter(c=>c.kind==='special').map(c=>`<label><input type="checkbox" ${state.courseUse[s]?.[c.id]?'checked':''} onchange="setCourseUse('${escJS(s)}','${c.id}',this.checked)">${esc(c.name)}</label>`).join('')+`</div></td></tr>`});html+='</tbody></table>';courseUseTable.innerHTML=html;}
+function setCourseUse(s,id,on){state.courseUse[s][id]=on; if(!on)days.forEach(d=>state.calls[s][d]=state.calls[s][d].filter(x=>x!==id)); buildRequiredFromCourses(); renderAll();}
+function renderPeriods(){let html='<table><thead><tr><th>コマ名</th><th>開始</th><th>授業時間</th><th>休憩</th><th>終了</th><th>適用するクラス・講座</th><th></th></tr></thead><tbody>';state.periods.forEach((p,i)=>{html+=`<tr><td><input value="${esc(p.name)}" onchange="state.periods[${i}].name=this.value"></td><td><input value="${esc(p.start)}" onchange="state.periods[${i}].start=this.value;renderPeriods()"></td><td><input type="number" min="1" value="${p.duration}" onchange="state.periods[${i}].duration=Number(this.value);renderPeriods()"></td><td><input type="number" min="0" value="${p.breakAfter||0}" onchange="state.periods[${i}].breakAfter=Number(this.value)"></td><td class="center nowrap">${addMin(p.start,p.duration)}</td><td><div class="check-grid">`+state.courses.map(c=>`<label><input type="checkbox" ${p.courseIds.includes(c.id)?'checked':''} onchange="togglePeriodCourse(${i},'${c.id}',this.checked)">${esc(c.name)}</label>`).join('')+`</div></td><td><button class="danger" onclick="state.periods.splice(${i},1);renderPeriods()">削除</button></td></tr>`});html+='</tbody></table>';periodTable.innerHTML=html;}
+function addPeriod(){state.periods.push({id:uid('p'),name:'新規コマ',start:'17:00',duration:60,breakAfter:0,courseIds:[]});renderPeriods();}
+function togglePeriodCourse(i,id,on){let a=state.periods[i].courseIds;if(on&&!a.includes(id))a.push(id);if(!on)state.periods[i].courseIds=a.filter(x=>x!==id);}
+function renderCalls(){let html='<table><thead><tr><th>校舎</th>'+days.map(d=>`<th>${d}</th>`).join('')+'</tr></thead><tbody>';state.schools.forEach(s=>{html+=`<tr><th>${esc(s)}</th>`+days.map(d=>{let opts=state.courses.filter(c=>state.courseUse[s]?.[c.id]);return `<td class="call-cell"><div class="check-grid">`+opts.map(c=>`<label><input type="checkbox" ${state.calls[s]?.[d]?.includes(c.id)?'checked':''} onchange="toggleCall('${escJS(s)}','${d}','${c.id}',this.checked)">${esc(c.name)}</label>`).join('')+`</div></td>`}).join('')+'</tr>'});html+='</tbody></table>';callTable.innerHTML=html;}
+function toggleCall(s,d,id,on){let a=state.calls[s][d]; if(on&&!a.includes(id))a.push(id); if(!on)state.calls[s][d]=a.filter(x=>x!==id);}
+function renderTeachers(){let specials=state.courses.filter(c=>c.kind==='special');let html='<table><thead><tr><th>講師名</th><th>5科目</th><th>校舎固定</th><th>固定校舎</th><th>対応できる講座</th><th></th></tr></thead><tbody>';state.teachers.forEach((t,i)=>{html+=`<tr><td><input value="${esc(t.name)}" onchange="state.teachers[${i}].name=this.value"></td><td><div class="check-grid">`+baseSubjects.map(s=>`<label><input type="checkbox" ${t.subjects.includes(s)?'checked':''} onchange="toggleTeacherSub(${i},'${s}',this.checked)">${s}</label>`).join('')+`</div></td><td class="center"><input type="checkbox" ${t.fixed?'checked':''} onchange="state.teachers[${i}].fixed=this.checked"></td><td><select onchange="state.teachers[${i}].school=this.value"><option value="">指定なし</option>`+state.schools.map(s=>`<option ${t.school===s?'selected':''}>${esc(s)}</option>`).join('')+`</select></td><td><div class="check-grid">`+specials.map(c=>`<label><input type="checkbox" ${t.specialIds.includes(c.id)?'checked':''} onchange="toggleTeacherSpecial(${i},'${c.id}',this.checked)">${esc(c.name)}</label>`).join('')+`</div></td><td><button class="danger" onclick="state.teachers.splice(${i},1);renderTeachers()">削除</button></td></tr>`});html+='</tbody></table>';teacherTable.innerHTML=html;}
+function addTeacherRow(){state.teachers.push({name:'',subjects:[],fixed:false,school:'',specialIds:[]});renderTeachers();}
+function toggleTeacherSub(i,s,on){let a=state.teachers[i].subjects;if(on&&!a.includes(s))a.push(s);if(!on)state.teachers[i].subjects=a.filter(x=>x!==s)}
+function toggleTeacherSpecial(i,id,on){let a=state.teachers[i].specialIds;if(on&&!a.includes(id))a.push(id);if(!on)state.teachers[i].specialIds=a.filter(x=>x!==id)}
+function buildRequiredFromCourses(){state.schools.forEach(s=>state.courses.forEach(c=>{if(!state.courseUse[s]?.[c.id])return;const key=s+'|'+c.id;if(!state.required[key])state.required[key]={}; if(c.kind==='middle'){baseSubjects.forEach(x=>{if(state.required[key][x]===undefined)state.required[key][x]=(x==='国'||x==='理'||x==='社')?1:(c.name==='1A'?1:2);});}else{if(state.required[key][c.id]===undefined)state.required[key][c.id]=c.name==='ジュニア'?2:1;}}));}
+function renderRequired(){buildRequiredFromCourses();let mh='<table><thead><tr><th>校舎</th><th>クラス</th>'+baseSubjects.map(s=>`<th>${s}</th>`).join('')+'</tr></thead><tbody>';state.schools.forEach(s=>state.courses.filter(c=>c.kind==='middle'&&state.courseUse[s]?.[c.id]).forEach(c=>{let key=s+'|'+c.id;mh+=`<tr><td>${esc(s)}</td><td>${esc(c.name)}</td>`+baseSubjects.map(sub=>`<td><input type="number" min="0" value="${state.required[key]?.[sub]||0}" onchange="state.required['${escJS(key)}']['${sub}']=Number(this.value)"></td>`).join('')+'</tr>'}));mh+='</tbody></table>';requiredMiddle.innerHTML=mh;let eh='<table><thead><tr><th>校舎</th><th>講座</th><th>週コマ数</th></tr></thead><tbody>';state.schools.forEach(s=>state.courses.filter(c=>c.kind==='special'&&state.courseUse[s]?.[c.id]).forEach(c=>{let key=s+'|'+c.id;eh+=`<tr><td>${esc(s)}</td><td>${esc(c.name)}</td><td><input type="number" min="0" value="${state.required[key]?.[c.id]||0}" onchange="state.required['${escJS(key)}']['${c.id}']=Number(this.value)"></td></tr>`}));eh+='</tbody></table>';requiredSpecial.innerHTML=eh;}
+function buildSlots(){const y=Number(year.value),m=Number(month.value),last=new Date(y,m,0).getDate();const slots=[];for(let day=1;day<=last;day++){const dt=new Date(y,m-1,day);const dow=days[(dt.getDay()+6)%7];state.schools.forEach(s=>{if(!state.open[s]?.[dow])return;(state.calls[s]?.[dow]||[]).forEach(cid=>{const c=courseById(cid);if(!c||!state.courseUse[s]?.[cid])return;state.periods.filter(p=>p.courseIds.includes(cid)).forEach(p=>{slots.push(slotObj(dt,dow,s,c,p));});});});}return slots;}
+function slotObj(dt,dow,school,course,period){let end=addMin(period.start,period.duration);return{date:dateStr(dt),dow,school,courseId:course.id,course:course.name,kind:course.kind,period:period.name,start:period.start,end,duration:period.duration,startMin:minutes(period.start),endMin:minutes(end),subject:'',teacher:'',note:''};}
+function generateCandidates(){candidates=[];const n=Math.max(1,Number(candidateCount.value)||5);for(let i=0;i<n;i++)candidates.push(generateOne(i));currentCandidateIndex=0;renderCandidateNav();renderCurrent();openTab('resultSec',document.querySelectorAll('.tab')[6]);}
+function generateOne(seed){let slots=buildSlots();const weeks=Number(document.getElementById('weeks').value)||4;const queues={};state.schools.forEach(s=>state.courses.forEach(c=>{if(!state.courseUse[s]?.[c.id])return;const key=s+'|'+c.id;const req=state.required[key]||{};queues[key]=[];if(c.kind==='middle'){baseSubjects.forEach(sub=>{for(let i=0;i<(Number(req[sub])||0)*weeks;i++)queues[key].push(sub)});}else{for(let i=0;i<(Number(req[c.id])||0)*weeks;i++)queues[key].push(c.name);}shuffle(queues[key],seed+key.length)}));slots.forEach(sl=>{const key=sl.school+'|'+sl.courseId;if(queues[key]?.length)sl.subject=queues[key].shift();else sl.note='空き枠';});const teacherLoad={};state.teachers.forEach(t=>teacherLoad[t.name]=0);slots.forEach(sl=>{if(!sl.subject)return;let eligible=state.teachers.filter(t=>eligibleTeacher(t,sl));shuffle(eligible,seed+sl.date.charCodeAt(8)+sl.startMin);eligible=eligible.filter(t=>canTeachSlot(t,sl,slots));if(eligible.length){eligible.sort((a,b)=>(teacherLoad[a.name]||0)-(teacherLoad[b.name]||0));sl.teacher=eligible[0].name;teacherLoad[sl.teacher]=(teacherLoad[sl.teacher]||0)+1;}else{sl.note='要手動調整';}});const remain=[];Object.keys(queues).forEach(k=>queues[k].forEach(sub=>remain.push({key:k,subject:sub})));const score=slots.filter(s=>s.teacher).length-slots.filter(s=>s.note==='要手動調整').length*5-remain.length*3;return{name:`候補${seed+1}`,slots,remain,score};}
+function eligibleTeacher(t,slot){if(!t.name)return false;if(t.fixed&&t.school&&t.school!==slot.school)return false;if(slot.kind==='middle')return t.subjects.includes(slot.subject);const c=state.courses.find(x=>x.name===slot.subject&&x.kind==='special')||courseById(slot.courseId);return t.specialIds.includes(c?.id);}
+function canTeachSlot(t,slot,all){const move=Number(moveMinutes.value)||0;for(const other of all){if(other===slot||other.teacher!==t.name||other.date!==slot.date)continue;if(overlap(slot,other))return false;if(slot.school!==other.school){const gap=slot.startMin>=other.endMin?slot.startMin-other.endMin:other.startMin-slot.endMin;if(gap<move)return false;}}return true;}
+function checkCurrent(){const c=candidates[currentCandidateIndex];if(!c)return;const errs=[];c.slots.forEach((s,i)=>{if(s.teacher){const t=state.teachers.find(x=>x.name===s.teacher);if(!t)errs.push(`行${i+1}: 登録されていない講師です。`);else if(!eligibleTeacher(t,s))errs.push(`行${i+1}: ${s.teacher} は ${s.school} / ${s.subject} に入れません。`);}});for(let i=0;i<c.slots.length;i++)for(let j=i+1;j<c.slots.length;j++){let a=c.slots[i],b=c.slots[j];if(!a.teacher||a.teacher!==b.teacher||a.date!==b.date)continue;if(overlap(a,b))errs.push(`行${i+1}・${j+1}: ${a.teacher} が同時刻に重複しています。`);if(a.school!==b.school){const gap=a.startMin>=b.endMin?a.startMin-b.endMin:b.startMin-a.endMin;if(gap<(Number(moveMinutes.value)||0))errs.push(`行${i+1}・${j+1}: ${a.teacher} の校舎間移動が${moveMinutes.value}分未満です。`);}}checkBox.innerHTML=errs.length?`<div class="important"><b>チェック結果</b><br>${errs.map(e=>'・'+e).join('<br>')}</div>`:`<div class="important"><b>チェック結果</b><br>大きな問題は見つかりませんでした。</div>`;}
+function renderCandidateNav(){let html='';candidates.forEach((c,i)=>html+=`<button class="${i===currentCandidateIndex?'active':''}" onclick="currentCandidateIndex=${i};renderCandidateNav();renderCurrent()">${c.name} <span class="mini">score ${c.score}</span></button>`);candidateNav.innerHTML=html;}
+function renderCurrent(){const c=candidates[currentCandidateIndex];if(!c){resultTable.innerHTML='';return}renderSummary(c);renderResultTable(c);checkBox.innerHTML='';}
+function renderSummary(c){resultSummary.innerHTML=`<div><span>候補</span><strong>${c.name}</strong></div><div><span>授業枠</span><strong>${c.slots.length}</strong></div><div><span>講師配置済</span><strong>${c.slots.filter(s=>s.teacher).length}</strong></div><div><span>手動調整</span><strong>${c.slots.filter(s=>s.note==='要手動調整').length}</strong></div>`;}
+function renderResultTable(c){let html='<table><thead><tr><th>日付</th><th>曜</th><th>校舎</th><th>クラス/講座</th><th>コマ</th><th>時間</th><th>科目/講座</th><th>講師</th><th>備考</th></tr></thead><tbody>';c.slots.forEach((s,i)=>html+=`<tr><td>${displayDate(s.date)}</td><td>${s.dow}</td><td>${esc(s.school)}</td><td>${esc(s.course)}</td><td>${esc(s.period)}</td><td>${s.start}〜${s.end}</td><td><input class="editable" value="${esc(s.subject)}" onchange="candidates[${currentCandidateIndex}].slots[${i}].subject=this.value"></td><td><input class="editable" value="${esc(s.teacher)}" onchange="candidates[${currentCandidateIndex}].slots[${i}].teacher=this.value"></td><td><input class="editable" value="${esc(s.note)}" onchange="candidates[${currentCandidateIndex}].slots[${i}].note=this.value"></td></tr>`);html+='</tbody></table>';resultTable.innerHTML=html;}
+function showAllCandidates(){if(!candidates.length)generateCandidates();let html='';candidates.forEach(c=>{html+=`<h3>${c.name} / score ${c.score}</h3><table><thead><tr><th>日付</th><th>曜</th><th>校舎</th><th>クラス/講座</th><th>コマ</th><th>時間</th><th>科目</th><th>講師</th><th>備考</th></tr></thead><tbody>`+c.slots.map(s=>`<tr><td>${displayDate(s.date)}</td><td>${s.dow}</td><td>${esc(s.school)}</td><td>${esc(s.course)}</td><td>${esc(s.period)}</td><td>${s.start}〜${s.end}</td><td>${esc(s.subject)}</td><td>${esc(s.teacher)}</td><td>${esc(s.note)}</td></tr>`).join('')+'</tbody></table>';});resultTable.innerHTML=html;openTab('resultSec',document.querySelectorAll('.tab')[6]);}
+function renderStudentOutput(){const c=candidates[currentCandidateIndex];if(!c)return;const groups={};c.slots.forEach(s=>{const k=s.school+' '+s.course;(groups[k]??=[]).push(s)});let html='';Object.keys(groups).sort().forEach(k=>{html+=`<h3>${esc(k)}</h3><table><thead><tr><th>日付</th><th>曜</th><th>時間</th><th>科目/講座</th><th>担当</th></tr></thead><tbody>`+groups[k].map(s=>`<tr><td>${displayDate(s.date)}</td><td>${s.dow}</td><td>${s.start}〜${s.end}</td><td>${esc(s.subject)}</td><td>${esc(s.teacher)}</td></tr>`).join('')+'</tbody></table>';});studentOutput.innerHTML=html;}
+function renderTeacherOutput(){const c=candidates[currentCandidateIndex];if(!c)return;const groups={};c.slots.filter(s=>s.teacher).forEach(s=>(groups[s.teacher]??=[]).push(s));let html='';Object.keys(groups).sort().forEach(k=>{html+=`<h3>${esc(k)}</h3><table><thead><tr><th>日付</th><th>曜</th><th>校舎</th><th>時間</th><th>クラス/講座</th><th>科目</th></tr></thead><tbody>`+groups[k].map(s=>`<tr><td>${displayDate(s.date)}</td><td>${s.dow}</td><td>${esc(s.school)}</td><td>${s.start}〜${s.end}</td><td>${esc(s.course)}</td><td>${esc(s.subject)}</td></tr>`).join('')+'</tbody></table>';});teacherOutput.innerHTML=html;}
+function collectRows(){const c=candidates[currentCandidateIndex];if(!c)return[];return c.slots.map(s=>[s.date,s.dow,s.school,s.course,s.period,s.start+'〜'+s.end,s.subject,s.teacher,s.note]);}
+function downloadCsv(){downloadText('時間割.csv','日付,曜日,校舎,クラス講座,コマ,時間,科目,講師,備考\n'+collectRows().map(r=>r.map(v=>'"'+String(v).replaceAll('"','""')+'"').join(',')).join('\n'),'text/csv');}
+function downloadExcelLike(){let html='<table><tr><th>日付</th><th>曜日</th><th>校舎</th><th>クラス講座</th><th>コマ</th><th>時間</th><th>科目</th><th>講師</th><th>備考</th></tr>'+collectRows().map(r=>'<tr>'+r.map(v=>`<td>${esc(v)}</td>`).join('')+'</tr>').join('')+'</table>';downloadText('時間割.xls',html,'application/vnd.ms-excel');}
+function downloadText(name,text,type){const blob=new Blob([text],{type:type+';charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();URL.revokeObjectURL(a.href)}
+function getConfig(){return{year:year.value,month:month.value,weeks:weeks.value,candidateCount:candidateCount.value,moveMinutes:moveMinutes.value,state};}
+function applyConfig(cfg){year.value=cfg.year;month.value=cfg.month;weeks.value=cfg.weeks;candidateCount.value=cfg.candidateCount;moveMinutes.value=cfg.moveMinutes||60;state=cfg.state;renderAll();}
+function saveBrowser(){localStorage.setItem('timetable_v23',JSON.stringify(getConfig()));alert('保存しました。')}
+function loadBrowser(){const s=localStorage.getItem('timetable_v23');if(!s)return alert('保存データがありません。');applyConfig(JSON.parse(s));}
+function downloadJson(){downloadText('時間割設定.json',JSON.stringify(getConfig(),null,2),'application/json')}
+function loadJsonFile(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>applyConfig(JSON.parse(r.result));r.readAsText(f)}
+function courseById(id){return state.courses.find(c=>c.id===id)}
+function dateStr(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+function displayDate(s){let [y,m,d]=s.split('-');return `${Number(m)}/${Number(d)}`}
+function minutes(t){let [h,m]=String(t||'0:0').split(':').map(Number);return (h||0)*60+(m||0)}
+function addMin(t,min){let total=minutes(t)+Number(min||0);let h=Math.floor(total/60)%24;let m=total%60;return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`}
+function overlap(a,b){return a.startMin<b.endMin&&b.startMin<a.endMin}
+function shuffle(arr,seed){for(let i=arr.length-1;i>0;i--){seed=(seed*9301+49297)%233280;let j=Math.floor((seed/233280)*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]]}}
+function esc(v){return String(v??'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))}
+function escJS(v){return String(v??'').replace(/\\/g,'\\\\').replace(/'/g,"\\'")}
+init();
+</script>
+</body>
+</html>
